@@ -1,6 +1,8 @@
 package src;
 
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class CourseRegistrationService {
 
@@ -40,6 +42,39 @@ public class CourseRegistrationService {
             e.printStackTrace();
             return false;
         }
+    }
+
+    
+
+
+     public List<String> getStudentCourses(int studentId) {
+        String query =
+            "SELECT c.coursecode, c.coursename " +
+            "FROM registrations r " +
+            "JOIN courses c ON c.coursecode = r.coursecode " +
+            "WHERE r.studentid = ? " +
+            "ORDER BY c.coursecode";
+
+        List<String> courses = new ArrayList<>();
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(query)) {
+
+            ps.setInt(1, studentId);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    String code = rs.getString("coursecode");
+                    String name = rs.getString("coursename");
+                    courses.add(code + " - " + name);
+                }
+            }
+
+        } catch (SQLException e) {
+            System.out.println("Fetch courses failed: " + e.getMessage());
+        }
+
+        return courses;
     }
 }
 
